@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -20,9 +20,15 @@ import {
   Input,
   Switch,
   useToast,
-  Text
+  Text,
+  Spinner,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, RepeatIcon } from '@chakra-ui/icons';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EmployeeCard from './EmployeeCard';
 
 export interface Employee {
@@ -33,9 +39,57 @@ export interface Employee {
   salary: number;
 }
 
+const fetchEmployees = async (): Promise<Employee[]> => {
+  const response = await fetch('http://localhost:3000/employees');
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
+const addEmployeeApi = async (employee: Omit<Employee, 'id'>): Promise<Employee> => {
+  const response = await fetch('http://localhost:3000/employees', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(employee),
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
+const updateEmployeeApi = async (employee: Employee): Promise<Employee> => {
+  const response = await fetch(`http://localhost:3000/employees/${employee.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: employee.name,
+      role: employee.role,
+      isActive: employee.isActive,
+      salary: employee.salary,
+    })
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
+
+const deleteEmployeeApi = async (id: number): Promise<void> => {
+  const response = await fetch(`http://localhost:3000/employees/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+};
+
 function App() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     role: '',
@@ -45,109 +99,96 @@ function App() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/employees');
-      if (response.ok) {
-        const data = await response.json();
-        setEmployees(data);
-      }
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: employees = [],
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['employees'],
+    queryFn: fetchEmployees,
+    retry: 2,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const addEmployee = async () => {
-    if (!newEmployee.name.trim() || !newEmployee.role.trim()) return;
-
-    try {
-      const response = await fetch('http://localhost:3000/employees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEmployee),
+  const addEmployeeMutation = useMutation({
+    mutationFn: addEmployeeApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      setNewEmployee({ name: '', role: '', isActive: true, salary: 0 });
+      onClose();
+      toast({
+        title: 'Employee added successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
       });
-
-      if (response.ok) {
-        await fetchEmployees();
-        setNewEmployee({ name: '', role: '', isActive: true, salary: 0 });
-        onClose();
-        toast({
-          title: 'Employee added successfully!',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-          position: 'top-right',
-        });
-      }
-    } catch (error) {
-      console.error('Error adding employee:', error);
-    }
-  };
-
-  const updateEmployee = async () => {
-    if (!editingEmployee) return;
-
-    try {
-      const response = await fetch(`http://localhost:3000/employees/${editingEmployee.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: editingEmployee.name,
-          role: editingEmployee.role,
-          isActive: editingEmployee.isActive,
-          salary: editingEmployee.salary,
-        })
+    },
+    onError: () => {
+      toast({
+        title: 'Error adding employee',
+        description: 'Please try again',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
       });
-
-      if (response.ok) {
-        const updatedEmployee = await response.json();
-        setEmployees(prev =>
-          prev.map(emp =>
-            emp.id === editingEmployee.id ? updatedEmployee : emp
-          )
-        );
-        onClose();
-        setEditingEmployee(null);
-        toast({
-          title: 'Employee updated successfully!',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-          position: 'top-right',
-        });
-      }
-    } catch (error) {
-      console.error('Error updating employee:', error);
     }
-  };
+  });
 
-  const deleteEmployee = async (id: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/employees/${id}`, {
-        method: 'DELETE',
+  const updateEmployeeMutation = useMutation({
+    mutationFn: updateEmployeeApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      onClose();
+      setEditingEmployee(null);
+      toast({
+        title: 'Employee updated successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
       });
-
-      if (response.ok) {
-        await fetchEmployees();
-        toast({
-          title: 'Employee deleted successfully!',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-          position: 'top-right',
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting employee:', error);
+    },
+    onError: () => {
+      toast({
+        title: 'Error updating employee',
+        description: 'Please try again',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
+      });
     }
-  };
+  });
+
+  const deleteEmployeeMutation = useMutation({
+    mutationFn: deleteEmployeeApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast({
+        title: 'Employee deleted successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error deleting employee',
+        description: 'Please try again',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
+      });
+    }
+  });
 
   const handleOpenAddDrawer = () => {
     setEditingEmployee(null);
@@ -161,21 +202,74 @@ function App() {
   };
 
   const handleSave = () => {
+    if (!newEmployee.name.trim() || !newEmployee.role.trim()) {
+      toast({
+        title: 'Please fill all required fields',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right',
+      });
+      return;
+    }
+
     if (editingEmployee) {
-      updateEmployee();
+      updateEmployeeMutation.mutate(editingEmployee);
     } else {
-      addEmployee();
+      addEmployeeMutation.mutate(newEmployee);
     }
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  const handleDelete = (id: number) => {
+    deleteEmployeeMutation.mutate(id);
+  };
 
-  if (loading) {
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: 'Refreshing data...',
+      status: 'info',
+      duration: 2000,
+      isClosable: true,
+      position: 'top-right',
+    });
+  };
+
+  // Loading state
+  if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Text fontSize="xl" textAlign="center">Loading...</Text>
+        <VStack spacing={4}>
+          <Spinner size="xl" color="brand.500" thickness="4px" />
+          <Text fontSize="xl" color="gray.600">Loading employees...</Text>
+        </VStack>
+      </Container>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <Alert status="error" borderRadius="lg">
+          <AlertIcon />
+          <Box>
+            <AlertTitle>Failed to load employees!</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error ? error.message : 'An unknown error occurred'}
+            </AlertDescription>
+          </Box>
+          <Button
+            ml="auto"
+            colorScheme="red"
+            variant="outline"
+            onClick={handleRefresh}
+            leftIcon={<RepeatIcon />}
+            isLoading={isLoading}
+          >
+            Try Again
+          </Button>
+        </Alert>
       </Container>
     );
   }
@@ -183,29 +277,40 @@ function App() {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
-        {/* Header with title and toolbar */}
         <HStack justify="space-between" align="center">
           <Heading size="xl" color="brand.600">
             Employee Management
           </Heading>
-          <Button
-            leftIcon={<AddIcon />}
-            colorScheme="brand"
-            onClick={handleOpenAddDrawer}
-            size="lg"
-          >
-            Add Employee
-          </Button>
+          <HStack spacing={3}>
+            <Button
+              leftIcon={<RepeatIcon />}
+              variant="outline"
+              colorScheme="brand"
+              onClick={handleRefresh}
+              isLoading={isLoading}
+              loadingText="Refreshing..."
+              size="lg"
+            >
+              Refresh
+            </Button>
+            <Button
+              leftIcon={<AddIcon />}
+              colorScheme="brand"
+              onClick={handleOpenAddDrawer}
+              size="lg"
+            >
+              Add Employee
+            </Button>
+          </HStack>
         </HStack>
 
-        {/* Employees Grid */}
         {employees.length > 0 ? (
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
             {employees.map((employee) => (
               <EmployeeCard
                 key={employee.id}
                 employee={employee}
-                onDelete={deleteEmployee}
+                onDelete={handleDelete}
                 onEdit={handleOpenEditDrawer}
               />
             ))}
@@ -219,7 +324,6 @@ function App() {
         )}
       </VStack>
 
-      {/* Drawer for Add/Edit Employee */}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
         <DrawerOverlay />
         <DrawerContent>
@@ -263,6 +367,7 @@ function App() {
               <FormControl isRequired>
                 <FormLabel>Salary</FormLabel>
                 <Input
+                  type="number"
                   value={editingEmployee ? editingEmployee.salary : newEmployee.salary}
                   onChange={(e) => {
                     if (editingEmployee) {
@@ -299,7 +404,12 @@ function App() {
               <Button variant="outline" mr={3} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="brand" onClick={handleSave}>
+              <Button
+                colorScheme="brand"
+                onClick={handleSave}
+                isLoading={addEmployeeMutation.isPending || updateEmployeeMutation.isPending}
+                loadingText={editingEmployee ? 'Updating...' : 'Adding...'}
+              >
                 {editingEmployee ? 'Update' : 'Add'}
               </Button>
             </HStack>
@@ -309,4 +419,5 @@ function App() {
     </Container>
   );
 }
+
 export default App;

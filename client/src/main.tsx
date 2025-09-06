@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 
-// Custom theme with brand color and rounded corners
 const theme = extendTheme({
   colors: {
     brand: {
@@ -27,10 +27,14 @@ const theme = extendTheme({
   },
 });
 
+const queryClient = new QueryClient()
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ChakraProvider theme={theme}>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </ChakraProvider>
   </StrictMode>,
 )
