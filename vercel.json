@@ -1,0 +1,8 @@
+{
+    "buildCommand": "cd client && npm run build",
+    "installCommand": "npm install --prefix client && npm install --prefix server",
+    "outputDirectory": "client/dist",
+    "regions": [
+        "fra1"
+    ]
+}
