@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs/promises';
 import path from 'path';
-const BASE_URL='http://localhost:30000/'
+// const BASE_URL='http://localhost:3000/'
+const BASE_URL='https://employee-management-z2j3.vercel.app'
 // import { fileURLToPath } from 'url';
 
 // const __filename = fileURLToPath(import.meta.url);

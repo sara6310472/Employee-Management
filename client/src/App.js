@@ -4,7 +4,8 @@ import { Box, Container, Heading, Button, SimpleGrid, HStack, VStack, Drawer, Dr
 import { AddIcon, RepeatIcon } from '@chakra-ui/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EmployeeCard from './EmployeeCard';
-const BASE_URL='http://localhost:3000'
+// const BASE_URL='http://localhost:3000'
+const BASE_URL = 'https://employee-management-z2j3.vercel.app'
 
 const fetchEmployees = async () => {
     const response = await fetch(`${BASE_URL}/employees`);
@@ -190,34 +191,60 @@ function App() {
     if (isError) {
         return (_jsx(Container, { maxW: "container.xl", py: 8, children: _jsxs(Alert, { status: "error", borderRadius: "lg", children: [_jsx(AlertIcon, {}), _jsxs(Box, { children: [_jsx(AlertTitle, { children: "Failed to load employees!" }), _jsx(AlertDescription, { children: error instanceof Error ? error.message : 'An unknown error occurred' })] }), _jsx(Button, { ml: "auto", colorScheme: "red", variant: "outline", onClick: handleRefresh, leftIcon: _jsx(RepeatIcon, {}), isLoading: isLoading, children: "Try Again" })] }) }));
     }
-    return (_jsxs(Container, { maxW: "container.xl", py: 8, children: [_jsxs(VStack, { spacing: 8, align: "stretch", children: [_jsxs(HStack, { justify: "space-between", align: "center", children: [_jsx(Heading, { size: "xl", color: "brand.600", children: "Employee Management" }), _jsxs(HStack, { spacing: 3, children: [_jsx(Button, { leftIcon: _jsx(RepeatIcon, {}), variant: "outline", colorScheme: "brand", onClick: handleRefresh, isLoading: isLoading, loadingText: "Refreshing...", size: "lg", children: "Refresh" }), _jsx(Button, { leftIcon: _jsx(AddIcon, {}), colorScheme: "brand", onClick: handleOpenAddDrawer, size: "lg", children: "Add Employee" })] })] }), employees.length > 0 ? (_jsx(SimpleGrid, { columns: { base: 1, md: 2, lg: 3 }, spacing: 6, children: employees.map((employee) => (_jsx(EmployeeCard, { employee: employee, onDelete: handleDelete, onEdit: handleOpenEditDrawer }, employee.id))) })) : (_jsx(Box, { textAlign: "center", py: 12, children: _jsx(Text, { fontSize: "lg", color: "gray.500", children: "No employees to display" }) }))] }), _jsxs(Drawer, { isOpen: isOpen, placement: "right", onClose: onClose, size: "md", children: [_jsx(DrawerOverlay, {}), _jsxs(DrawerContent, { children: [_jsx(DrawerCloseButton, {}), _jsx(DrawerHeader, { children: editingEmployee ? 'Edit Employee' : 'Add New Employee' }), _jsx(DrawerBody, { children: _jsxs(VStack, { spacing: 6, children: [_jsxs(FormControl, { isRequired: true, children: [_jsx(FormLabel, { children: "Employee Name" }), _jsx(Input, { value: editingEmployee ? editingEmployee.name : newEmployee.name, onChange: (e) => {
-                                                        if (editingEmployee) {
-                                                            setEditingEmployee({ ...editingEmployee, name: e.target.value });
-                                                        }
-                                                        else {
-                                                            setNewEmployee({ ...newEmployee, name: e.target.value });
-                                                        }
-                                                    }, placeholder: "Enter employee name" })] }), _jsxs(FormControl, { isRequired: true, children: [_jsx(FormLabel, { children: "Role" }), _jsx(Input, { value: editingEmployee ? editingEmployee.role : newEmployee.role, onChange: (e) => {
-                                                        if (editingEmployee) {
-                                                            setEditingEmployee({ ...editingEmployee, role: e.target.value });
-                                                        }
-                                                        else {
-                                                            setNewEmployee({ ...newEmployee, role: e.target.value });
-                                                        }
-                                                    }, placeholder: "Enter role" })] }), _jsxs(FormControl, { isRequired: true, children: [_jsx(FormLabel, { children: "Salary" }), _jsx(Input, { type: "number", value: editingEmployee ? editingEmployee.salary : newEmployee.salary, onChange: (e) => {
-                                                        if (editingEmployee) {
-                                                            setEditingEmployee({ ...editingEmployee, salary: Number(e.target.value) });
-                                                        }
-                                                        else {
-                                                            setNewEmployee({ ...newEmployee, salary: Number(e.target.value) });
-                                                        }
-                                                    }, placeholder: "Enter salary" })] }), _jsxs(FormControl, { display: "flex", alignItems: "center", children: [_jsx(FormLabel, { htmlFor: "active-status", mb: "0", children: "Active Employee" }), _jsx(Switch, { id: "active-status", isChecked: editingEmployee ? editingEmployee.isActive : newEmployee.isActive, onChange: (e) => {
-                                                        if (editingEmployee) {
-                                                            setEditingEmployee({ ...editingEmployee, isActive: e.target.checked });
-                                                        }
-                                                        else {
-                                                            setNewEmployee({ ...newEmployee, isActive: e.target.checked });
-                                                        }
-                                                    } })] })] }) }), _jsx(DrawerFooter, { children: _jsxs(HStack, { spacing: 3, children: [_jsx(Button, { variant: "outline", mr: 3, onClick: onClose, children: "Cancel" }), _jsx(Button, { colorScheme: "brand", onClick: handleSave, isLoading: addEmployeeMutation.isPending || updateEmployeeMutation.isPending, loadingText: editingEmployee ? 'Updating...' : 'Adding...', children: editingEmployee ? 'Update' : 'Add' })] }) })] })] })] }));
+    return (_jsxs(Container, {
+        maxW: "container.xl", py: 8, children: [_jsxs(VStack, { spacing: 8, align: "stretch", children: [_jsxs(HStack, { justify: "space-between", align: "center", children: [_jsx(Heading, { size: "xl", color: "brand.600", children: "Employee Management" }), _jsxs(HStack, { spacing: 3, children: [_jsx(Button, { leftIcon: _jsx(RepeatIcon, {}), variant: "outline", colorScheme: "brand", onClick: handleRefresh, isLoading: isLoading, loadingText: "Refreshing...", size: "lg", children: "Refresh" }), _jsx(Button, { leftIcon: _jsx(AddIcon, {}), colorScheme: "brand", onClick: handleOpenAddDrawer, size: "lg", children: "Add Employee" })] })] }), employees.length > 0 ? (_jsx(SimpleGrid, { columns: { base: 1, md: 2, lg: 3 }, spacing: 6, children: employees.map((employee) => (_jsx(EmployeeCard, { employee: employee, onDelete: handleDelete, onEdit: handleOpenEditDrawer }, employee.id))) })) : (_jsx(Box, { textAlign: "center", py: 12, children: _jsx(Text, { fontSize: "lg", color: "gray.500", children: "No employees to display" }) }))] }), _jsxs(Drawer, {
+            isOpen: isOpen, placement: "right", onClose: onClose, size: "md", children: [_jsx(DrawerOverlay, {}), _jsxs(DrawerContent, {
+                children: [_jsx(DrawerCloseButton, {}), _jsx(DrawerHeader, { children: editingEmployee ? 'Edit Employee' : 'Add New Employee' }), _jsx(DrawerBody, {
+                    children: _jsxs(VStack, {
+                        spacing: 6, children: [_jsxs(FormControl, {
+                            isRequired: true, children: [_jsx(FormLabel, { children: "Employee Name" }), _jsx(Input, {
+                                value: editingEmployee ? editingEmployee.name : newEmployee.name, onChange: (e) => {
+                                    if (editingEmployee) {
+                                        setEditingEmployee({ ...editingEmployee, name: e.target.value });
+                                    }
+                                    else {
+                                        setNewEmployee({ ...newEmployee, name: e.target.value });
+                                    }
+                                }, placeholder: "Enter employee name"
+                            })]
+                        }), _jsxs(FormControl, {
+                            isRequired: true, children: [_jsx(FormLabel, { children: "Role" }), _jsx(Input, {
+                                value: editingEmployee ? editingEmployee.role : newEmployee.role, onChange: (e) => {
+                                    if (editingEmployee) {
+                                        setEditingEmployee({ ...editingEmployee, role: e.target.value });
+                                    }
+                                    else {
+                                        setNewEmployee({ ...newEmployee, role: e.target.value });
+                                    }
+                                }, placeholder: "Enter role"
+                            })]
+                        }), _jsxs(FormControl, {
+                            isRequired: true, children: [_jsx(FormLabel, { children: "Salary" }), _jsx(Input, {
+                                type: "number", value: editingEmployee ? editingEmployee.salary : newEmployee.salary, onChange: (e) => {
+                                    if (editingEmployee) {
+                                        setEditingEmployee({ ...editingEmployee, salary: Number(e.target.value) });
+                                    }
+                                    else {
+                                        setNewEmployee({ ...newEmployee, salary: Number(e.target.value) });
+                                    }
+                                }, placeholder: "Enter salary"
+                            })]
+                        }), _jsxs(FormControl, {
+                            display: "flex", alignItems: "center", children: [_jsx(FormLabel, { htmlFor: "active-status", mb: "0", children: "Active Employee" }), _jsx(Switch, {
+                                id: "active-status", isChecked: editingEmployee ? editingEmployee.isActive : newEmployee.isActive, onChange: (e) => {
+                                    if (editingEmployee) {
+                                        setEditingEmployee({ ...editingEmployee, isActive: e.target.checked });
+                                    }
+                                    else {
+                                        setNewEmployee({ ...newEmployee, isActive: e.target.checked });
+                                    }
+                                }
+                            })]
+                        })]
+                    })
+                }), _jsx(DrawerFooter, { children: _jsxs(HStack, { spacing: 3, children: [_jsx(Button, { variant: "outline", mr: 3, onClick: onClose, children: "Cancel" }), _jsx(Button, { colorScheme: "brand", onClick: handleSave, isLoading: addEmployeeMutation.isPending || updateEmployeeMutation.isPending, loadingText: editingEmployee ? 'Updating...' : 'Adding...', children: editingEmployee ? 'Update' : 'Add' })] }) })]
+            })]
+        })]
+    }));
 }
 export default App;
