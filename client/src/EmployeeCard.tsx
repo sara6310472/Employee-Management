@@ -7,12 +7,12 @@ import {
     VStack,
     IconButton,
     Avatar,
-    Collapse,
-    useDisclosure,
     Box,
-    Divider
+    Divider,
+    Button
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { useState } from 'react';
 import type { Employee } from './App';
 
 interface EmployeeCardProps {
@@ -22,7 +22,7 @@ interface EmployeeCardProps {
 }
 
 function EmployeeCard({ employee, onDelete, onEdit }: EmployeeCardProps) {
-    const { isOpen, onToggle } = useDisclosure();
+    const [isOpen, setIsOpen] = useState(false);
 
     const getInitials = (name: string) => {
         return name
@@ -72,7 +72,7 @@ function EmployeeCard({ employee, onDelete, onEdit }: EmployeeCardProps) {
                         </Badge>
                     </HStack>
 
-                    {/* Collapsible Content */}
+                    {/* Collapsible Content - Using Simple State */}
                     <Box>
                         <HStack justify="space-between" align="center" mb={2}>
                             <Text fontSize="sm" color="gray.600" fontWeight="medium">
@@ -83,12 +83,22 @@ function EmployeeCard({ employee, onDelete, onEdit }: EmployeeCardProps) {
                                 icon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
                                 size="sm"
                                 variant="ghost"
-                                onClick={onToggle}
+                                onClick={() => setIsOpen(!isOpen)}
                             />
                         </HStack>
 
-                        <Collapse in={isOpen} animateOpacity>
-                            <Box pt={2}>
+                        {/* Conditional Rendering Instead of Collapse */}
+                        {isOpen && (
+                            <Box
+                                pt={2}
+                                animation="fadeIn 0.2s ease-in"
+                                css={{
+                                    '@keyframes fadeIn': {
+                                        from: { opacity: 0, maxHeight: 0 },
+                                        to: { opacity: 1, maxHeight: '500px' },
+                                    },
+                                }}
+                            >
                                 <Divider mb={3} />
                                 <VStack align="stretch" spacing={2}>
                                     <HStack justify="space-between">
@@ -103,7 +113,7 @@ function EmployeeCard({ employee, onDelete, onEdit }: EmployeeCardProps) {
                                     </HStack>
                                 </VStack>
                             </Box>
-                        </Collapse>
+                        )}
                     </Box>
 
                     {/* Action Buttons */}
