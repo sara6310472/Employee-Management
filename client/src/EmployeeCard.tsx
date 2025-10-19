@@ -98,7 +98,7 @@ function EmployeeCard({ employee, onDelete, onEdit }: EmployeeCardProps) {
                                     <HStack justify="space-between">
                                         <Text fontSize="sm" color="gray.600">Salary:</Text>
                                         <Text fontSize="sm" fontWeight="medium">
-                                            {employee.salary + '$'}
+                                            ${employee.salary}
                                         </Text>
                                     </HStack>
                                 </VStack>
