@@ -40,7 +40,7 @@ export interface Employee {
 }
 
 const fetchEmployees = async (): Promise<Employee[]> => {
-  const response = await fetch('http://localhost:3000/employees');
+  const response = await fetch('/api/employees');
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -48,7 +48,7 @@ const fetchEmployees = async (): Promise<Employee[]> => {
 };
 
 const addEmployeeApi = async (employee: Omit<Employee, 'id'>): Promise<Employee> => {
-  const response = await fetch('http://localhost:3000/employees', {
+  const response = await fetch('/api/employees', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const addEmployeeApi = async (employee: Omit<Employee, 'id'>): Promise<Employee>
 };
 
 const updateEmployeeApi = async (employee: Employee): Promise<Employee> => {
-  const response = await fetch(`http://localhost:3000/employees/${employee.id}`, {
+  const response = await fetch(`/api/employees/${employee.id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const updateEmployeeApi = async (employee: Employee): Promise<Employee> => {
 };
 
 const deleteEmployeeApi = async (id: number): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/employees/${id}`, {
+  const response = await fetch(`/api/employees/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) {

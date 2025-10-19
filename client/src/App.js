@@ -5,14 +5,14 @@ import { AddIcon, RepeatIcon } from '@chakra-ui/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EmployeeCard from './EmployeeCard';
 const fetchEmployees = async () => {
-    const response = await fetch('http://localhost:3000/employees');
+    const response = await fetch('/api/employees');
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json();
 };
 const addEmployeeApi = async (employee) => {
-    const response = await fetch('http://localhost:3000/employees', {
+    const response = await fetch('/api/employees', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ const addEmployeeApi = async (employee) => {
     return response.json();
 };
 const updateEmployeeApi = async (employee) => {
-    const response = await fetch(`http://localhost:3000/employees/${employee.id}`, {
+    const response = await fetch(`/api/employees/${employee.id}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const updateEmployeeApi = async (employee) => {
     return response.json();
 };
 const deleteEmployeeApi = async (id) => {
-    const response = await fetch(`http://localhost:3000/employees/${id}`, {
+    const response = await fetch(`/api/employees/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
