@@ -40,7 +40,7 @@ export interface Employee {
 }
 
 const fetchEmployees = async (): Promise<Employee[]> => {
-  const response = await fetch('/api/employees');
+  const response = await fetch('/employees');
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }

@@ -1,5 +1,18 @@
 {
-    "buildCommand": "cd client && npm ci && npm run build",
-    "outputDirectory": "client/dist",
-    "installCommand": "npm ci --prefix client"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

@@ -1,174 +1,128 @@
-import express from 'express';
-import cors from 'cors';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+// פתרון זמני - בסיס נתונים בזיכרון (ימחק בכל deploy)
+// לפרודקשן אמיתי צריך DB חיצוני כמו MongoDB/PostgreSQL
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let employees = [
+    { id: 1, name: "John Smith", role: "Senior Software Engineer", isActive: true, salary: 120000 },
+    { id: 2, name: "Sarah Johnson", role: "Project Manager", isActive: true, salary: 95000 },
+    { id: 3, name: "Michael Chen", role: "UI/UX Designer", isActive: true, salary: 85000 },
+    { id: 4, name: "Emily Davis", role: "Backend Developer", isActive: true, salary: 110000 },
+    { id: 5, name: "David Wilson", role: "QA Engineer", isActive: true, salary: 80000 },
+    { id: 6, name: "Jessica Martinez", role: "DevOps Engineer", isActive: true, salary: 115000 },
+    { id: 7, name: "Robert Taylor", role: "Frontend Developer", isActive: false, salary: 100000 },
+    { id: 8, name: "Amanda Brown", role: "Data Analyst", isActive: true, salary: 90000 },
+    { id: 9, name: "Christopher Lee", role: "Security Specialist", isActive: true, salary: 125000 },
+    { id: 10, name: "Lisa Anderson", role: "Product Owner", isActive: true, salary: 105000 },
+    { id: 11, name: "James Garcia", role: "Machine Learning Engineer", isActive: true, salary: 130000 },
+    { id: 12, name: "Maria Rodriguez", role: "Business Analyst", isActive: true, salary: 88000 },
+    { id: 13, name: "Kevin Thompson", role: "Cloud Architect", isActive: true, salary: 135000 },
+    { id: 14, name: "Rachel White", role: "Technical Writer", isActive: false, salary: 75000 },
+    { id: 15, name: "Daniel Harris", role: "Mobile Developer", isActive: true, salary: 108000 },
+    { id: 16, name: "Sophie Martin", role: "HR Manager", isActive: true, salary: 92000 },
+    { id: 17, name: "Matthew Jackson", role: "Full Stack Developer", isActive: true, salary: 112000 },
+    { id: 18, name: "Olivia Clark", role: "Marketing Manager", isActive: true, salary: 89000 },
+    { id: 19, name: "Brandon Lewis", role: "Systems Administrator", isActive: true, salary: 98000 },
+    { id: 20, name: "Megan Walker", role: "Solutions Architect", isActive: true, salary: 128000 }
+];
 
-const app = express();
-const dbPath = path.join(__dirname, '../server/db.json');
-const PORT = 3000;
+export default function handler(req, res) {
+    // הגדרת CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Read database file
-const readDb = async () => {
-    try {
-        const data = await fs.readFile(dbPath, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading database:', error);
-        throw error;
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
-};
 
-// Write to database file
-const writeDb = async (data) => {
+    const { id } = req.query;
+
     try {
-        await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+        // GET - Fetch all employees
+        if (req.method === 'GET' && !id) {
+            return res.status(200).json(employees);
+        }
+
+        // GET - Fetch single employee by ID
+        if (req.method === 'GET' && id) {
+            const employee = employees.find(e => e.id === parseInt(id));
+            if (!employee) {
+                return res.status(404).json({ error: 'Employee not found' });
+            }
+            return res.status(200).json(employee);
+        }
+
+        // POST - Create new employee
+        if (req.method === 'POST') {
+            const { name, role, isActive, salary } = req.body;
+
+            if (!name || !role || salary === undefined) {
+                return res.status(400).json({ error: 'Missing required fields: name, role, salary' });
+            }
+
+            const newId = employees.length > 0
+                ? Math.max(...employees.map(e => e.id)) + 1
+                : 1;
+
+            const newEmployee = {
+                id: newId,
+                name: name.trim(),
+                role: role.trim(),
+                isActive: isActive !== undefined ? isActive : true,
+                salary: parseInt(salary)
+            };
+
+            employees.push(newEmployee);
+            return res.status(201).json(newEmployee);
+        }
+
+        // PATCH - Update employee
+        if (req.method === 'PATCH' && id) {
+            const employeeId = parseInt(id);
+            const { name, role, isActive, salary } = req.body;
+
+            const employeeIndex = employees.findIndex(e => e.id === employeeId);
+
+            if (employeeIndex === -1) {
+                return res.status(404).json({ error: 'Employee not found' });
+            }
+
+            if (name !== undefined) {
+                employees[employeeIndex].name = name.trim();
+            }
+            if (role !== undefined) {
+                employees[employeeIndex].role = role.trim();
+            }
+            if (isActive !== undefined) {
+                employees[employeeIndex].isActive = isActive;
+            }
+            if (salary !== undefined) {
+                employees[employeeIndex].salary = parseInt(salary);
+            }
+
+            return res.status(200).json(employees[employeeIndex]);
+        }
+
+        // DELETE - Delete employee
+        if (req.method === 'DELETE' && id) {
+            const employeeId = parseInt(id);
+            const employeeIndex = employees.findIndex(e => e.id === employeeId);
+
+            if (employeeIndex === -1) {
+                return res.status(404).json({ error: 'Employee not found' });
+            }
+
+            const deletedEmployee = employees.splice(employeeIndex, 1);
+            return res.status(200).json({
+                message: 'Employee deleted successfully',
+                deleted: deletedEmployee[0]
+            });
+        }
+
+        return res.status(405).json({ error: 'Method not allowed' });
+
     } catch (error) {
-        console.error('Error writing to database:', error);
-        throw error;
+        console.error('Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
-};
-
-// GET - Fetch all employees
-app.get('/employees', async (req, res) => {
-    try {
-        const db = await readDb();
-        res.json(db.employees);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch employees' });
-    }
-});
-
-// GET - Fetch single employee by ID
-app.get('/employees/:id', async (req, res) => {
-    try {
-        const db = await readDb();
-        const employee = db.employees.find(e => e.id === parseInt(req.params.id));
-
-        if (!employee) {
-            return res.status(404).json({ error: 'Employee not found' });
-        }
-
-        res.json(employee);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch employee' });
-    }
-});
-
-// POST - Create new employee
-app.post('/employees', async (req, res) => {
-    try {
-        const { name, role, isActive, salary } = req.body;
-
-        // Validation
-        if (!name || !role || salary === undefined) {
-            return res.status(400).json({ error: 'Missing required fields: name, role, salary' });
-        }
-
-        const db = await readDb();
-
-        // Generate new ID
-        const newId = db.employees.length > 0
-            ? Math.max(...db.employees.map(e => e.id)) + 1
-            : 1;
-
-        const newEmployee = {
-            id: newId,
-            name: name.trim(),
-            role: role.trim(),
-            isActive: isActive !== undefined ? isActive : true,
-            salary: parseInt(salary)
-        };
-
-        db.employees.push(newEmployee);
-        await writeDb(db);
-
-        res.status(201).json(newEmployee);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create employee' });
-    }
-});
-
-// PATCH - Update employee
-app.patch('/employees/:id', async (req, res) => {
-    try {
-        const employeeId = parseInt(req.params.id);
-        const { name, role, isActive, salary } = req.body;
-
-        const db = await readDb();
-        const employeeIndex = db.employees.findIndex(e => e.id === employeeId);
-
-        if (employeeIndex === -1) {
-            return res.status(404).json({ error: 'Employee not found' });
-        }
-
-        // Update only provided fields
-        if (name !== undefined) {
-            db.employees[employeeIndex].name = name.trim();
-        }
-        if (role !== undefined) {
-            db.employees[employeeIndex].role = role.trim();
-        }
-        if (isActive !== undefined) {
-            db.employees[employeeIndex].isActive = isActive;
-        }
-        if (salary !== undefined) {
-            db.employees[employeeIndex].salary = parseInt(salary);
-        }
-
-        await writeDb(db);
-        res.json(db.employees[employeeIndex]);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to update employee' });
-    }
-});
-
-// DELETE - Delete employee
-app.delete('/employees/:id', async (req, res) => {
-    try {
-        const employeeId = parseInt(req.params.id);
-        const db = await readDb();
-
-        const employeeIndex = db.employees.findIndex(e => e.id === employeeId);
-
-        if (employeeIndex === -1) {
-            return res.status(404).json({ error: 'Employee not found' });
-        }
-
-        const deletedEmployee = db.employees.splice(employeeIndex, 1);
-        await writeDb(db);
-
-        res.json({ message: 'Employee deleted successfully', deleted: deletedEmployee[0] });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to delete employee' });
-    }
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'Server is running' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-});
-
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
-});
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`✅ Employee Server running on http://localhost:${PORT}`);
-    console.log(`📊 Database file: ${dbPath}`);
-});
+}
