@@ -1,0 +1,144 @@
+{
+    "employees": [
+        {
+            "id": 1,
+            "name": "John Smith",
+            "role": "Senior Software Engineer",
+            "isActive": true,
+            "salary": 120000
+        },
+        {
+            "id": 2,
+            "name": "Sarah Johnson",
+            "role": "Project Manager",
+            "isActive": true,
+            "salary": 95000
+        },
+        {
+            "id": 3,
+            "name": "Michael Chen",
+            "role": "UI/UX Designer",
+            "isActive": true,
+            "salary": 85000
+        },
+        {
+            "id": 4,
+            "name": "Emily Davis",
+            "role": "Backend Developer",
+            "isActive": true,
+            "salary": 110000
+        },
+        {
+            "id": 5,
+            "name": "David Wilson",
+            "role": "QA Engineer",
+            "isActive": true,
+            "salary": 80000
+        },
+        {
+            "id": 6,
+            "name": "Jessica Martinez",
+            "role": "DevOps Engineer",
+            "isActive": true,
+            "salary": 115000
+        },
+        {
+            "id": 7,
+            "name": "Robert Taylor",
+            "role": "Frontend Developer",
+            "isActive": false,
+            "salary": 100000
+        },
+        {
+            "id": 8,
+            "name": "Amanda Brown",
+            "role": "Data Analyst",
+            "isActive": true,
+            "salary": 90000
+        },
+        {
+            "id": 9,
+            "name": "Christopher Lee",
+            "role": "Security Specialist",
+            "isActive": true,
+            "salary": 125000
+        },
+        {
+            "id": 10,
+            "name": "Lisa Anderson",
+            "role": "Product Owner",
+            "isActive": true,
+            "salary": 105000
+        },
+        {
+            "id": 11,
+            "name": "James Garcia",
+            "role": "Machine Learning Engineer",
+            "isActive": true,
+            "salary": 130000
+        },
+        {
+            "id": 12,
+            "name": "Maria Rodriguez",
+            "role": "Business Analyst",
+            "isActive": true,
+            "salary": 88000
+        },
+        {
+            "id": 13,
+            "name": "Kevin Thompson",
+            "role": "Cloud Architect",
+            "isActive": true,
+            "salary": 135000
+        },
+        {
+            "id": 14,
+            "name": "Rachel White",
+            "role": "Technical Writer",
+            "isActive": false,
+            "salary": 75000
+        },
+        {
+            "id": 15,
+            "name": "Daniel Harris",
+            "role": "Mobile Developer",
+            "isActive": true,
+            "salary": 108000
+        },
+        {
+            "id": 16,
+            "name": "Sophie Martin",
+            "role": "HR Manager",
+            "isActive": true,
+            "salary": 92000
+        },
+        {
+            "id": 17,
+            "name": "Matthew Jackson",
+            "role": "Full Stack Developer",
+            "isActive": true,
+            "salary": 112000
+        },
+        {
+            "id": 18,
+            "name": "Olivia Clark",
+            "role": "Marketing Manager",
+            "isActive": true,
+            "salary": 89000
+        },
+        {
+            "id": 19,
+            "name": "Brandon Lewis",
+            "role": "Systems Administrator",
+            "isActive": true,
+            "salary": 98000
+        },
+        {
+            "id": 20,
+            "name": "Megan Walker",
+            "role": "Solutions Architect",
+            "isActive": true,
+            "salary": 128000
+        }
+    ]
+}
